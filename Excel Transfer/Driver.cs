@@ -31,6 +31,14 @@ namespace Excel_Transfer {
 
             extractData();
 
+            Excel e = new Excel("Sheet 22");
+            e.set(1, 1, 34);
+            e.set(4, 4, "something");
+            e.set(7, 3, new DateTime());
+
+            e.saveAs("testExcel.xlsx");
+            e.close();
+
 
             Console.WriteLine(value);
             Console.WriteLine($"The variable from the config file is: {labour.lastRow()}");
