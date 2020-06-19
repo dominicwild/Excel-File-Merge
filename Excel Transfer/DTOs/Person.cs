@@ -12,6 +12,7 @@ namespace Excel_Transfer {
         public string jobFamily { get; set; }
         public string jobRole { get; set; }
         public double rate { get; set; }
+        public double costRate { get; set; }
         public int id { get; }
 
         public Person(int id) {

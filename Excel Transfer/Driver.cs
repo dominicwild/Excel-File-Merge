@@ -12,10 +12,25 @@ using static Excel_Transfer.Logger;
 namespace Excel_Transfer {
     class Driver {
 
-        private const string PERSON_ID = "Pers.No.";
+        //private const string PERSON_ID = "Pers.No";
+        //private const string PROJECT_ID = "Project number";
+        //private const string WEEK_END = "Week Ending";
+
+        private const string EMPLOYEE_ID = "Personnel number";
+        private const string EMPLOYEE_NAME = "Name of employee or applicant";
+        private const string EMPLOYEE_ROLE = "Emp Role";
+        private const string EMPLOYEE_HOURLY_RATE = "Hourly Rate";
+        private const string EMPLOYEE_COST_RATE = "Cost Rate";
         private const string PROJECT_ID = "Project number";
+        private const string WEEK_END = "Week-End-Date";
+        private const string PROJECT_TIME = "Project Time";
+        private const string PROJECT_NAME = "Description";
+
         private const string DATE_FORMAT = "dd/MM/yyyy";
         private const string EMPLOYEE_NAME_HEADER = "Employee Name";
+        private const string EMPLOYEE_ROLE_HEADER = "Employee Role";
+        private const string EMPLOYEE_HOURLY_RATE_HEADER = "Hourly Rate";
+        private const string EMPLOYEE_COST_RATE_HEADER = "Cost Rate";
         private const string PROJECT_NAME_HEADER = "Project Name";
 
         Dictionary<int, Person> people = new Dictionary<int, Person>();
@@ -27,8 +42,9 @@ namespace Excel_Transfer {
 
             string currentDir = Directory.GetCurrentDirectory();
 
-            string labourFileLocation = ConfigurationManager.AppSettings["LabourFile"];
-            string labourFileWorkSheet = ConfigurationManager.AppSettings["LabourWorkSheet"];
+            string labourFile = ConfigurationManager.AppSettings["LabourFile2"];
+            string labourFileWorkSheet = ConfigurationManager.AppSettings["LabourWorkSheet2"];
+            string labourFileLocation = $"{currentDir }\\{labourFile}";
             string resourceTrackerFile = ConfigurationManager.AppSettings["ResourceTrackerFile"];
 
             log($"Loading in: {labourFileLocation} with worksheet {labourFileWorkSheet}");
@@ -37,12 +53,6 @@ namespace Excel_Transfer {
             extractData();
 
             createSpreadSheet();
-
-
-
-            Console.WriteLine($"The current working directory is: {currentDir}");
-            Console.ReadLine();
-
         }
 
         public void createSpreadSheet() {
@@ -56,19 +66,33 @@ namespace Excel_Transfer {
             populateSpreadsheet(e);
             formatSpreadsheet(e);
 
-            var a = e.get(5, 5);
+            string currentDir = Directory.GetCurrentDirectory();
+            string outputFileName = ConfigurationManager.AppSettings["OutputFileName"];
+            string outputFilePath = $"{currentDir}\\{outputFileName}";
 
-            string outputDir = ConfigurationManager.AppSettings["OutputDirectory"];
-
-            log("Saving new spreadsheet.");
-            e.saveAs($"{outputDir}testExcel2.xlsx");
+            log($"Saving new spreadsheet to {outputFilePath}");
+            e.saveAs(outputFilePath);
             e.close();
         }
 
         public void formatSpreadsheet(Excel e) {
-            e.autoExpandColumns();
+            log("Formatting spreadsheet.");
+
+            log("Formatting headers.");
+            e.formatHeaders();
+
+            log("Adding defaults to date headers.");
             string[] dateHeaders = e.getDateHeaders();
             e.fillWithDefault(0, dateHeaders);
+
+            log("Adding currency formats to columns.");
+            e.formatCurrency(EMPLOYEE_COST_RATE_HEADER);
+            e.formatCurrency(EMPLOYEE_HOURLY_RATE_HEADER);
+
+            log("Expanding columns.");
+            e.autoExpandColumns();
+
+            log("Formatting completed.");
         }
 
         public void populateSpreadsheet(Excel e) {
@@ -87,6 +111,9 @@ namespace Excel_Transfer {
                 }
 
                 e.set(EMPLOYEE_NAME_HEADER, row, fullName);
+                e.set(EMPLOYEE_COST_RATE_HEADER, row, person.costRate);
+                e.set(EMPLOYEE_HOURLY_RATE_HEADER, row, person.rate);
+                e.set(EMPLOYEE_ROLE_HEADER, row, person.jobRole);
                 e.set(PROJECT_NAME_HEADER, row, project.name);
 
                 foreach (KeyValuePair<DateTime, double> logKeyPair in unit.workLog) {
@@ -116,7 +143,7 @@ namespace Excel_Transfer {
             Array.Sort(dates);
 
             string[] dateHeaders = dates.Select(date => date.ToString(DATE_FORMAT)).ToArray();
-            List<string> headers = new List<string>(new string[] { PROJECT_NAME_HEADER, EMPLOYEE_NAME_HEADER });
+            List<string> headers = new List<string>(new string[] { PROJECT_NAME_HEADER, EMPLOYEE_NAME_HEADER, EMPLOYEE_ROLE_HEADER, EMPLOYEE_COST_RATE_HEADER, EMPLOYEE_HOURLY_RATE_HEADER });
 
             headers.AddRange(dateHeaders);
             log($"Created headers: {headers}");
@@ -124,14 +151,20 @@ namespace Excel_Transfer {
         }
 
         public void extractData() {
-            log($"Extracing data from spreadsheet(s).");
+            log($"Extracting data from spreadsheet(s).");
 
             int lastRow = labour.lastRow();
+            int totalRows = lastRow - 1;
+            int percentIncrement = (int)Math.Floor((double)lastRow / 15);
 
-            for (int i = 2; i < lastRow; i++) {
-                populatePerson(i);
-                populateProject(i);
-                populateWorkUnit(i);
+            for (int row = 2; row < lastRow; row++) {
+                populatePerson(row);
+                populateProject(row);
+                populateWorkUnit(row);
+                if (row % percentIncrement == 0) {
+                    int percent = (int)Math.Round((((double)row / totalRows) * 100));
+                    log($"{percent}% complete data extraction.");
+                }
             }
 
             log($"Successfully extracted {lastRow - 1} rows of data.");
@@ -139,7 +172,7 @@ namespace Excel_Transfer {
 
         public void populateWorkUnit(int row) {
 
-            int personId = (int)labour.get(PERSON_ID, row);
+            int personId = (int)labour.get(EMPLOYEE_ID, row);
             int projectId = (int)labour.get(PROJECT_ID, row);
             string workUnitId = $"{personId}{projectId}";
 
@@ -151,24 +184,31 @@ namespace Excel_Transfer {
             }
 
             WorkUnit unit = workUnits[workUnitId];
-            DateTime date = (DateTime)labour.get("Week ending", row);
-            double hoursWorked = (double)labour.get("Project time", row);
+            DateTime date = (DateTime)labour.get(WEEK_END, row);
+            double hoursWorked = (double)labour.get(PROJECT_TIME, row);
 
             unit.addWork(date, hoursWorked);
 
         }
 
         public void populatePerson(int row) {
-            int id = (int)labour.get(PERSON_ID, row);
+            int id = (int)labour.get(EMPLOYEE_ID, row);
             if (!people.ContainsKey(id)) {
                 Person p = new Person(id);
-                string fullName = labour.get("Name of employee or applicant", row);
+                string fullName = labour.get(EMPLOYEE_NAME, row);
                 if (fullName.Contains(",")) {
                     p.firstName = fullName.Split(',')[1].Trim();
                     p.lastName = fullName.Split(',')[0].Trim();
                 } else {
                     p.firstName = fullName;
                 }
+
+                p.jobRole = labour.get(EMPLOYEE_ROLE, row).ToString();
+                p.rate = labour.get<double>(EMPLOYEE_HOURLY_RATE, row);
+                p.costRate = labour.get<double>(EMPLOYEE_COST_RATE, row);
+
+
+
                 people[id] = p;
             }
         }
@@ -177,7 +217,7 @@ namespace Excel_Transfer {
             int id = (int)labour.get(PROJECT_ID, row);
             if (!projects.ContainsKey(id)) {
                 Project p = new Project(id) {
-                    name = labour.get("Description", row)
+                    name = labour.get(PROJECT_NAME, row)
                 };
 
                 projects[id] = p;

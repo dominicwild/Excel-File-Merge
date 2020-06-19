@@ -32,11 +32,10 @@ namespace Excel_Transfer {
             Driver driver = new Driver();
             driver.run(excel);
 
-            //book.SaveAs("test24.xlsx");
-            //book.Close(true, $"{currentDirectory}\\test.xlsx");
-            //book.Close();
-
             cleanup(excel);
+
+            log($"The program has exited. Press any key to continue.", "Green");
+            Console.ReadLine();
         }
 
         static void killExcelProcesses() {
