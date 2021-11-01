@@ -360,3 +360,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+Excel Transfer/obj/Debug/DesignTimeResolveAssemblyReferencesInput.cache
+Excel Transfer/bin/Debug/*
+Excel Transfer/bin/Debug/Excel Transfer.exe
+Excel Transfer/obj/Debug/Excel Transfer.csproj.ResolveComReference.cache

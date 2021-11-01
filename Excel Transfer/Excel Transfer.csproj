@@ -49,10 +49,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>C53D51BE4965C37EA0147985344C2C7284B27872</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>F1C5C5BDFD803776A8951E3E71ED4A7D5C42E453</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>Excel Transfer_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>Excel Transfer_1_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <GenerateManifests>true</GenerateManifests>
@@ -88,6 +88,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="Excel Transfer_1_TemporaryKey.pfx" />
+    <None Include="Excel Transfer_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="Microsoft.Office.Core">

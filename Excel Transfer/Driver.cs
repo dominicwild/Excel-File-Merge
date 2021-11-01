@@ -105,7 +105,7 @@ namespace Excel_Transfer {
                 Project project = unit.project;
                 string fullName = "";
                 if (!String.IsNullOrEmpty(person.lastName)) {
-                    fullName = $"{person.firstName} , {person.lastName}";
+                    fullName = $"{person.firstName}, {person.lastName}";
                 } else {
                     fullName = person.firstName;
                 }
