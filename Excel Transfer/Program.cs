@@ -28,7 +28,6 @@ namespace Excel_Transfer {
             int id = GetExcelProcessId(excel);
             log($"Created excel process with ID: {id}");
 
-
             Driver driver = new Driver();
             driver.run(excel);
 

@@ -44,7 +44,7 @@ namespace Excel_Transfer {
 
             string labourFile = ConfigurationManager.AppSettings["LabourFile2"];
             string labourFileWorkSheet = ConfigurationManager.AppSettings["LabourWorkSheet2"];
-            string labourFileLocation = $"{currentDir }\\{labourFile}";
+            string labourFileLocation = $"{currentDir}\\{labourFile}";
             string resourceTrackerFile = ConfigurationManager.AppSettings["ResourceTrackerFile"];
 
             log($"Loading in: {labourFileLocation} with worksheet {labourFileWorkSheet}");
